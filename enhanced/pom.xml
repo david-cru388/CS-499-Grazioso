@@ -1,0 +1,54 @@
+<!--
+  pom.xml — Grazioso Salvare Rescue Animal System (enhanced)
+  Author: David Cruz
+  Date: 2026-11-09
+  Version: 1.0.0
+  Purpose: Maven build file. Sets the Java target version and the JUnit 5
+  test dependency so the whole project builds and tests with "mvn test".
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.davidcru388</groupId>
+  <artifactId>grazioso</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <!-- JDK 27 installed, but compile to Java 21 (LTS) so it runs on any 21+ JVM -->
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.11.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!-- Surefire is the plugin that runs tests during "mvn test" -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
