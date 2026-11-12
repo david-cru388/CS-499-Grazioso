@@ -21,8 +21,8 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 public final class InputValidator {
-    //  accepts letters from any writing system, not just ASCII.
-    private static final Pattern NAME = Pattern.compile("[\\p{L} '-]{1,40}");
+    // Restrict text to ASCII to block look-alike characters and encoding variants.
+    private static final Pattern TEXT_PATTERN = Pattern.compile("[A-Za-z '-]{1,40}");
 
     private InputValidator() {
     }
@@ -48,11 +48,7 @@ public final class InputValidator {
             throw new ValidationException(fieldName + " must be a whole number.");
         }
 
-        if (value < min || value > max) {
-            throw new ValidationException(
-                    fieldName + " must be between " + min + " and " + max + ".");
-        }
-        return value;
+        return requireInRange(value, fieldName, min, max);
     }
 
     public static boolean parseYesNo(String input) {
@@ -86,11 +82,7 @@ public final class InputValidator {
             throw new ValidationException(fieldName + " must be a number.");
         }
 
-        if (!Double.isFinite(measurement) || measurement < min || measurement > max) {
-            throw new ValidationException(
-                    fieldName + " must be a finite number between " + min + " and " + max + ".");
-        }
-        return measurement;
+        return requireInRange(measurement, fieldName, min, max);
     }
 
     public static LocalDate parseDate(String input) {
@@ -113,17 +105,40 @@ public final class InputValidator {
     }
 
     public static String validateName(String input) {
+        return validateText(input, "Name");
+    }
+
+    public static String validateText(String input, String fieldName) {
         if (input == null || input.isBlank()) {
-            throw new ValidationException("Name is required.");
+            throw new ValidationException(fieldName + " is required.");
         }
 
-        String name = input.strip();
-        // matches() checks the entire name, so a valid prefix cannot hide extra input.
-        if (!NAME.matcher(name).matches()
-                || name.codePoints().noneMatch(Character::isLetter)) {
+        String text = input.strip();
+        // matches() checks the entire text, so a valid prefix cannot hide extra input.
+        if (!TEXT_PATTERN.matcher(text).matches()
+                || text.codePoints().noneMatch(Character::isLetter)) {
             throw new ValidationException(
-                    "Name must contain 1 to 40 letters, spaces, apostrophes, or hyphens.");
+                    fieldName + " must contain 1 to 40 letters, spaces, apostrophes, or hyphens.");
         }
-        return name;
+        return text;
     }
+
+    public static double requireInRange(double value, String fieldName, double min, double max) {
+        // NaN makes every range comparison false, so check for it explicitly before
+        // range checking.
+        if (Double.isNaN(value) || value < min || value > max) {
+            throw new ValidationException(
+                    fieldName + " must be between " + min + " and " + max + ".");
+        }
+        return value;
+    }
+
+    public static int requireInRange(int value, String fieldName, int min, int max) {
+        if (value < min || value > max) {
+            throw new ValidationException(
+                    fieldName + " must be between " + min + " and " + max + ".");
+        }
+        return value;
+    }
+
 }

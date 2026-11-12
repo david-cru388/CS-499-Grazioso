@@ -110,10 +110,8 @@ class InputValidatorTest {
     }
 
     @Test
-    void acceptsNamesWithUnicodeLettersAndStripsWhitespace() {
+    void acceptsNamesAndStripsWhitespace() {
         assertEquals("Anne-Marie O'Neil", InputValidator.validateName(" Anne-Marie O'Neil "));
-        assertEquals("José", InputValidator.validateName("José"));
-        assertEquals("Björn", InputValidator.validateName("Björn"));
         assertEquals("A".repeat(40), InputValidator.validateName("A".repeat(40)));
     }
 
@@ -121,6 +119,7 @@ class InputValidatorTest {
     void rejectsInvalidNames() {
         assertThrows(ValidationException.class, () -> InputValidator.validateName(""));
         assertThrows(ValidationException.class, () -> InputValidator.validateName("Name123"));
+        assertThrows(ValidationException.class, () -> InputValidator.validateName("Björn"));
         assertThrows(ValidationException.class, () -> InputValidator.validateName("-"));
         assertThrows(ValidationException.class, () -> InputValidator.validateName("' '"));
         assertThrows(ValidationException.class, () -> InputValidator.validateName("Rex\u0007"));
@@ -128,4 +127,40 @@ class InputValidatorTest {
                 () -> InputValidator.validateName("A".repeat(41)));
         assertThrows(ValidationException.class, () -> InputValidator.validateName(null));
     }
+
+    @Test
+    void requireInRangeValidatesDoubleBounds() {
+        assertEquals(1.0, InputValidator.requireInRange(1.0, "Weight", 1.0, 250.0), 0.0001);
+        assertEquals(250.0, InputValidator.requireInRange(250.0, "Weight", 1.0, 250.0), 0.0001);
+        assertThrows(ValidationException.class,
+                () -> InputValidator.requireInRange(0.9, "Weight", 1.0, 250.0));
+        assertThrows(ValidationException.class,
+                () -> InputValidator.requireInRange(250.1, "Weight", 1.0, 250.0));
+        assertThrows(ValidationException.class,
+                () -> InputValidator.requireInRange(Double.NaN, "Weight", 1.0, 250.0));
+    }
+
+    @Test
+    void requireInRangeValidatesIntBounds() {
+        assertEquals(0, InputValidator.requireInRange(0, "Age", 0, 30));
+        assertEquals(30, InputValidator.requireInRange(30, "Age", 0, 30));
+        assertThrows(ValidationException.class,
+                () -> InputValidator.requireInRange(-1, "Age", 0, 30));
+        assertThrows(ValidationException.class,
+                () -> InputValidator.requireInRange(31, "Age", 0, 30));
+    }
+
+    @Test
+    void validatesTextFieldWithSpecificMessage() {
+        assertEquals("German Shepherd",
+                InputValidator.validateText(" German Shepherd ", "Breed"));
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> InputValidator.validateText("Lab123", "Breed"));
+
+        assertEquals(
+                "Breed must contain 1 to 40 letters, spaces, apostrophes, or hyphens.",
+                exception.getMessage());
+    }
+
 }
