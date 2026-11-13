@@ -19,8 +19,8 @@ import java.time.LocalDate;
 import io.github.davidcru388.grazioso.validation.InputValidator;
 
 public final class Dog extends RescueAnimal {
-    private static final double MIN_WEIGHT_LB = 1;
-    private static final double MAX_WEIGHT_LB = 250;
+    public static final double MIN_WEIGHT_LB = 1;
+    public static final double MAX_WEIGHT_LB = 250;
 
     private final String breed;
 

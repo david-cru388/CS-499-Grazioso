@@ -24,6 +24,9 @@ public abstract class RescueAnimal {
     public static final int MAX_AGE = 30;
 
     private long id;
+    // All animal data is fixed at intake with the exception of training status,
+    // reservation,
+    // and in-service country since these change over the animal's life.
     private final AnimalType type;
     private final String name;
     private final Gender gender;
@@ -41,6 +44,7 @@ public abstract class RescueAnimal {
             Gender gender,
             int ageYears,
             double weightLb,
+            // Used for validation; these bounds are not stored.
             double minWeightLb,
             double maxWeightLb,
             LocalDate acquisitionDate,
@@ -81,6 +85,8 @@ public abstract class RescueAnimal {
         return id;
     }
 
+    // Invalid or reassigned IDs are treated as programming errors,
+    // not user-input validation errors.
     public void assignId(long id) {
         if (this.id != 0) {
             throw new IllegalStateException("Animal ID has already been assigned.");
@@ -134,6 +140,8 @@ public abstract class RescueAnimal {
         return reserved;
     }
 
+    // Reservation eligibility belongs to the service layer, so this accepts either
+    // value.
     public void setReserved(boolean reserved) {
         this.reserved = reserved;
     }
