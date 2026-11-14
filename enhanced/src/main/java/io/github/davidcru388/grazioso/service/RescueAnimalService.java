@@ -38,6 +38,10 @@ public class RescueAnimalService {
         return repository.findByName(name);
     }
 
+    public List<RescueAnimal> findAll() {
+        return repository.findAll();
+    }
+
     public RescueAnimal reserve(long id) {
         RescueAnimal animal = repository.findById(id)
                 .orElseThrow(() -> new ValidationException("No animal found with ID " + id + "."));

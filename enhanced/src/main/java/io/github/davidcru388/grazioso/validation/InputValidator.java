@@ -35,6 +35,10 @@ public final class InputValidator {
         return parseIntInRange(input, "Menu choice", 1, max);
     }
 
+    public static int parseId(String input) {
+        return parseIntInRange(input, "ID", 1, Integer.MAX_VALUE);
+    }
+
     private static int parseIntInRange(String input, String fieldName, int min, int max) {
         if (input == null || input.isBlank()) {
             throw new ValidationException(fieldName + " is required.");
