@@ -9,8 +9,9 @@
  *   Stores rescue animals in memory for the current application run.
  *
  * Design notes:
- *   Uses linear scans deliberately to provide an O(n) baseline for the E2
+ *   Uses linear scans on purposeto provide an O(n) baseline for the
  *   HashMap optimization comparison.
+ * 
  */
 
 package io.github.davidcru388.grazioso.repository;
@@ -34,7 +35,7 @@ public class InMemoryAnimalRepository implements AnimalRepository {
 
     @Override
     public Optional<RescueAnimal> findById(long id) {
-        // Keep the linear scan as the O(n) baseline for the E2 comparison.
+        // Keep the linear scan as the O(n) baseline for the HashMap comparison.
         for (RescueAnimal animal : animals) {
             if (animal.getId() == id) {
                 return Optional.of(animal);
@@ -45,7 +46,7 @@ public class InMemoryAnimalRepository implements AnimalRepository {
 
     @Override
     public List<RescueAnimal> findByName(String name) {
-        // Keep the linear scan as the O(n) baseline for the E2 comparison.
+        // Keep the linear scan as the O(n) baseline for the HashMap comparison.
         List<RescueAnimal> matches = new ArrayList<>();
         for (RescueAnimal animal : animals) {
             if (animal.getName().equalsIgnoreCase(name)) {

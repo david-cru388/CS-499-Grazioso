@@ -6,11 +6,12 @@
  * Version:  1.0
  *
  * Purpose:
- *   Provides rescue-animal operations and enforces reservation rules.
+ *   Provides rescue animal operations and enforces reservation rules.
  *
  * Design notes:
  *   Receives its repository as a constructor dependency so storage
  *   implementations can be replaced without changing service behavior.
+ * 
  */
 
 package io.github.davidcru388.grazioso.service;

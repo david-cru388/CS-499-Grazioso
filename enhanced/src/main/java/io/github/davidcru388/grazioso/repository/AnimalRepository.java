@@ -2,7 +2,7 @@
  * File:     AnimalRepository.java
  * Project:  CS-499-Grazioso
  * Author:   David Cruz
- * Date:     2026-11-13
+ * Date:     2026-11-12
  * Version:  1.0
  *
  * Purpose:
@@ -10,8 +10,9 @@
  *
  * Design notes:
  *   The service depends on this interface rather than a specific storage
- *   implementation, allowing E2 (HashMap) and E3 (SQLite) repositories to
+ *   implementation, allowing the plannd HashMap and SQLite repositories to
  *   replace the current implementation without changing service code.
+ * 
  */
 
 package io.github.davidcru388.grazioso.repository;

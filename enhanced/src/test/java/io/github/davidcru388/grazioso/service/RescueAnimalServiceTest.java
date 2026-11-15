@@ -9,8 +9,8 @@
  *   Tests animal intake, name matching, and reservation behavior in the service.
  *
  * Design notes:
- *   Uses the in-memory repository to verify service behavior through its
- *   repository abstraction.
+ *   Uses the in-memory repository to verify service behavior 
+ * 
  */
 
 package io.github.davidcru388.grazioso.service;

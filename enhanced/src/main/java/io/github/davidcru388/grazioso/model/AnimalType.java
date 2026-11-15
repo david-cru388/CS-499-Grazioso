@@ -12,6 +12,7 @@
  *   Defines the supported animal types as enum values. This replaces the 
  *   original animalType field, which was declared but not used, and provides a 
  *   consistent type for identifying animals.
+ * 
  */
 
 package io.github.davidcru388.grazioso.model;

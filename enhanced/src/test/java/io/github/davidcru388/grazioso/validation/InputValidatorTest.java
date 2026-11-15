@@ -6,11 +6,11 @@
  * Version:  1.0
  *
  * Purpose:
- *   Tests valid and invalid input handling by the application's validator.
+ *   Tests valid and invalid input handling by the application's input validator.
  *
  * Design notes:
- *   Covers validation boundaries and representative malformed inputs without
- *   depending on a fixed current date.
+ *   Tests both valid limits and typical errors without relying on a specific date.
+ * 
  */
 
 package io.github.davidcru388.grazioso.validation;

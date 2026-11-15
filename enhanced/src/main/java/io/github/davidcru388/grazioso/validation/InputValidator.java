@@ -2,16 +2,17 @@
  * File:     InputValidator.java
  * Project:  CS-499-Grazioso
  * Author:   David Cruz
- * Date:     2026-11-12
+ * Date:     2026-11-10
  * Version:  1.0
  *
  * Purpose:
- *   Provides reusable validation and parsing for values entered into the
+ *   Provides validation and parsing for values entered into the
  *   rescue animal application.
  *
  * Design notes:
- *   Centralizes input rules and reports invalid values through
- *   ValidationException instead of returning defaults or leaking parse errors.
+ *   Enforces input rules and reports invalid values through
+ *   ValidationException instead of returning defaults or exposing parse errors.
+ * 
  */
 
 package io.github.davidcru388.grazioso.validation;
@@ -48,7 +49,7 @@ public final class InputValidator {
         try {
             value = Integer.parseInt(input.strip());
         } catch (NumberFormatException e) {
-            // Replace Java's parsing detail with a concise message for the user.
+            // Replaces Java's parsing errormessage with a concise message for the user.
             throw new ValidationException(fieldName + " must be a whole number.");
         }
 
@@ -82,7 +83,7 @@ public final class InputValidator {
         try {
             measurement = Double.parseDouble(input.strip());
         } catch (NumberFormatException e) {
-            // Keep implementation-specific parsing details out of user-facing errors.
+            // Keep parsing errors out of user-facing errors.
             throw new ValidationException(fieldName + " must be a number.");
         }
 
@@ -128,7 +129,7 @@ public final class InputValidator {
     }
 
     public static double requireInRange(double value, String fieldName, double min, double max) {
-        // NaN makes every range comparison false, so check for it explicitly before
+        // NaN makes every range comparison false, so check for it directly before
         // range checking.
         if (Double.isNaN(value) || value < min || value > max) {
             throw new ValidationException(

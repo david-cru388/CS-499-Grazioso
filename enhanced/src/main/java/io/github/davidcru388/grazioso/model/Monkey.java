@@ -9,9 +9,8 @@
  *   Represents a monkey in the rescue animal system.
  *
  * Design Notes:
- *   Species validation is restricted to a predefined enum to prevent invalid text input.
- *   The defined measurement ranges are intended as validation bounds to 
- *   intercept data entry errors, rather than absolute maximums/minimums.
+ *   Extends the RescueAnimal base class with monkey-specific fields
+ * 
  */
 
 package io.github.davidcru388.grazioso.model;

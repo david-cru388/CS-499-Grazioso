@@ -10,7 +10,8 @@
  *
  * Design notes:
  *   Replaces the original string gender field with a fixed set of 
- *   enum values, so the model can represent only the allowed options.
+ *   enum values, so the model can represent only the defined options.
+ * 
  */
 
 package io.github.davidcru388.grazioso.model;

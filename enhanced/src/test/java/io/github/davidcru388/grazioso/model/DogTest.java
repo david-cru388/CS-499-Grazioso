@@ -2,15 +2,16 @@
  * File:     DogTest.java
  * Project:  CS-499-Grazioso
  * Author:   David Cruz
- * Date:     2026-11-13
+ * Date:     2026-11-11
  * Version:  1.0
  *
  * Purpose:
- *   Tests that Dog validates its own weight limits and other model constraints.
+ *   Tests that Dog validates its own weight limits and other model limits.
  *
  * Design notes:
- *   Constructs valid Dog instances and varies one input at a time to verify
+ *   Constructs valid Dog instances and changes one input at a time to verify
  *   validation at the model boundary.
+ * 
  */
 
 package io.github.davidcru388.grazioso.model;

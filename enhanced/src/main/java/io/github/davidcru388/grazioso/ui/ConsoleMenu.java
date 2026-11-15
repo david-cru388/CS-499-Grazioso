@@ -9,8 +9,9 @@
  *   Provides the console interface for managing rescue animals.
  *
  * Design notes:
- *   Receives input and output streams through its constructor so the menu can
- *   be tested without depending directly on System.in and System.out.
+ *   Improved menu by Receiving input and output streams through its constructor so the menu can
+ *   be tested without depending on System.in and System.out.
+ * 
  */
 
 package io.github.davidcru388.grazioso.ui;
@@ -72,11 +73,11 @@ public class ConsoleMenu {
                 s -> InputValidator.parseMeasurement(
                         s, "Weight", Dog.MIN_WEIGHT_LB, Dog.MAX_WEIGHT_LB));
         var acquisitionDate = prompt("Acquisition date (yyyy-MM-dd)", InputValidator::parseDate);
-        String acquisitionCountry =
-                prompt("Acquisition country", s -> InputValidator.validateText(s, "Acquisition country"));
+        String acquisitionCountry = prompt("Acquisition country",
+                s -> InputValidator.validateText(s, "Acquisition country"));
         TrainingStatus trainingStatus = promptTrainingStatus();
-        String inServiceCountry =
-                prompt("In-service country", s -> InputValidator.validateText(s, "In-service country"));
+        String inServiceCountry = prompt("In-service country",
+                s -> InputValidator.validateText(s, "In-service country"));
 
         try {
             // Newly entered animals are not reserved.
@@ -141,7 +142,8 @@ public class ConsoleMenu {
         }
     }
 
-    // Re-prompts with a field-specific parser until it accepts the input.
+    // Repeats until valid input is received, then returns the parsed value.
+    // Validation errors are printed to the console.
     private <T> T prompt(String label, Function<String, T> parser) {
         while (true) {
             out.print(label + ": ");
