@@ -10,7 +10,8 @@
  *
  * Design notes:
  *   Creates the repository and service before passing the service to the
- *   console menu.
+ *   console menu. Switching repository implementations is one line because
+ *   the service depends on the AnimalRepository interface.
  * 
  */
 
@@ -24,13 +25,13 @@ import io.github.davidcru388.grazioso.model.Gender;
 import io.github.davidcru388.grazioso.model.Monkey;
 import io.github.davidcru388.grazioso.model.MonkeySpecies;
 import io.github.davidcru388.grazioso.model.TrainingStatus;
-import io.github.davidcru388.grazioso.repository.InMemoryAnimalRepository;
+import io.github.davidcru388.grazioso.repository.HashMapAnimalRepository;
 import io.github.davidcru388.grazioso.service.RescueAnimalService;
 import io.github.davidcru388.grazioso.ui.ConsoleMenu;
 
 public class App {
         public static void main(String[] args) {
-                RescueAnimalService service = new RescueAnimalService(new InMemoryAnimalRepository());
+                RescueAnimalService service = new RescueAnimalService(new HashMapAnimalRepository());
                 seedSampleData(service);
                 new ConsoleMenu(service, new Scanner(System.in), System.out).run();
         }

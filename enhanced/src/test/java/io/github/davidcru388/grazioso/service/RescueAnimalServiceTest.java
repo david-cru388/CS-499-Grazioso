@@ -2,15 +2,15 @@
  * File:     RescueAnimalServiceTest.java
  * Project:  CS-499-Grazioso
  * Author:   David Cruz
- * Date:     2026-11-13
+ * Date:     2026-11-17
  * Version:  1.0
  *
  * Purpose:
- *   Tests animal intake, name matching, and reservation behavior in the service.
+ *   Tests animal intake, lookup, and reservation behavior through the service.
  *
  * Design notes:
- *   Uses the in-memory repository to verify service behavior 
- * 
+ *   Runs the same tests against both repositories to verify the HashMap
+ *   implementation behaves like the O(n) in-memory baseline.
  */
 
 package io.github.davidcru388.grazioso.service;
@@ -21,19 +21,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import io.github.davidcru388.grazioso.model.Dog;
 import io.github.davidcru388.grazioso.model.Gender;
 import io.github.davidcru388.grazioso.model.RescueAnimal;
 import io.github.davidcru388.grazioso.model.TrainingStatus;
+import io.github.davidcru388.grazioso.repository.AnimalRepository;
+import io.github.davidcru388.grazioso.repository.HashMapAnimalRepository;
 import io.github.davidcru388.grazioso.repository.InMemoryAnimalRepository;
 import io.github.davidcru388.grazioso.validation.ValidationException;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class RescueAnimalServiceTest {
 
-    private RescueAnimalService createService() {
-        return new RescueAnimalService(new InMemoryAnimalRepository());
+    static Stream<Named<Supplier<AnimalRepository>>> repositories() {
+        return Stream.of(
+                Named.of("InMemoryAnimalRepository", InMemoryAnimalRepository::new),
+                Named.of("HashMapAnimalRepository", HashMapAnimalRepository::new));
+    }
+
+    private RescueAnimalService createService(Supplier<AnimalRepository> newRepository) {
+        return new RescueAnimalService(newRepository.get());
     }
 
     private Dog dog(String name, TrainingStatus status) {
@@ -50,9 +63,10 @@ class RescueAnimalServiceTest {
                 "Great Dane");
     }
 
-    @Test
-    void assignsUniquePositiveIdsOnIntake() {
-        RescueAnimalService service = createService();
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void assignsUniquePositiveIdsOnIntake(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
         RescueAnimal first = service.intake(dog("Rex", TrainingStatus.PHASE_I));
         RescueAnimal second = service.intake(dog("Bella", TrainingStatus.PHASE_I));
 
@@ -61,18 +75,20 @@ class RescueAnimalServiceTest {
         assertNotEquals(first.getId(), second.getId());
     }
 
-    @Test
-    void allowsMultipleAnimalsWithTheSameName() {
-        RescueAnimalService service = createService();
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void allowsMultipleAnimalsWithTheSameName(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
         service.intake(dog("Spot", TrainingStatus.PHASE_I));
         service.intake(dog("Spot", TrainingStatus.PHASE_I));
 
         assertEquals(2, service.findByName("spot").size());
     }
 
-    @Test
-    void onlyReservesInServiceAnimals() {
-        RescueAnimalService service = createService();
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void onlyReservesInServiceAnimals(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
         RescueAnimal inTraining = service.intake(dog("Rex", TrainingStatus.PHASE_I));
 
         assertThrows(ValidationException.class, () -> service.reserve(inTraining.getId()));
@@ -81,5 +97,37 @@ class RescueAnimalServiceTest {
         RescueAnimal reserved = service.reserve(inService.getId());
 
         assertTrue(reserved.isReserved());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void rejectsReservingUnknownId(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
+
+        assertThrows(ValidationException.class, () -> service.reserve(999));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void rejectsReservingAnimalTwice(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
+        RescueAnimal animal = service.intake(dog("Spot", TrainingStatus.IN_SERVICE));
+
+        service.reserve(animal.getId());
+
+        assertThrows(ValidationException.class, () -> service.reserve(animal.getId()));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void listsOnlyAvailableInServiceAnimals(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
+        service.intake(dog("Training", TrainingStatus.PHASE_I));
+        Dog reserved = dog("Reserved", TrainingStatus.IN_SERVICE);
+        reserved.setReserved(true);
+        service.intake(reserved);
+        RescueAnimal available = service.intake(dog("Available", TrainingStatus.IN_SERVICE));
+
+        assertEquals(List.of(available), service.availableAnimals());
     }
 }
