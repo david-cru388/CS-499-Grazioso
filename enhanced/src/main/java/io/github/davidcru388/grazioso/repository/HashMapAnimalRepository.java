@@ -6,12 +6,11 @@
  * Version:  1.0
  *
  * Purpose:
- *   Stores rescue animals using maps indexed by ID and normalized name.
+ *   Stores rescue animals using maps indexed by ID and name.
  *
  * Design notes:
  *   Replaces linear scans with hash indexes behind the same repository
- *   interface, so the service and menu do not change. This demonstrates that
- *   the E1 design supports swapping storage implementations.
+ *   interface, so the service and menu do not change. 
  */
 
 package io.github.davidcru388.grazioso.repository;

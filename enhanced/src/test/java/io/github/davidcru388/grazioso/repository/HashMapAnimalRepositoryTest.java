@@ -9,9 +9,9 @@
  *   Tests behavior specific to the HashMap animal repository.
  *
  * Design notes:
- *   These tests cover HashMap-specific normalization, ordering, immutability,
- *   and duplicate-save behavior; shared repository behavior belongs in the
- *   parameterized service test suite.
+ *   These tests verify that the HashMap implementation behaves like the O(n)
+ *   in-memory baseline, and that the HashMap implementation does not allow
+ *   duplicate animals to be saved. 
  */
 
 package io.github.davidcru388.grazioso.repository;
