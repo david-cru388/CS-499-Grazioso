@@ -26,21 +26,20 @@ import java.util.Optional;
 import io.github.davidcru388.grazioso.model.RescueAnimal;
 
 public class HashMapAnimalRepository implements AnimalRepository {
-    // LinkedHashMap preserves intake order while retaining O(1) average lookups;
-    // its insertion-order links use a little more memory than a plain HashMap.
+    // LinkedHashMap preserves intake order while retaining O(1) average lookups
     private final Map<Long, RescueAnimal> byId = new LinkedHashMap<>();
     private final Map<String, List<RescueAnimal>> byName = new HashMap<>();
     private long nextId = 1;
 
     private static String nameKey(String name) {
-        // Locale.ROOT avoids language-specific casing (for example Turkish I).
+        // Locale.ROOT avoids language-specific casing.
         // Names are ASCII-validated, so Unicode normalization is unnecessary.
         return name.strip().toLowerCase(Locale.ROOT);
     }
 
     @Override
     public RescueAnimal save(RescueAnimal animal) {
-        // Keep both indexes in sync; this is the only method that writes either map.
+        // Keep both indexes in sync
         animal.assignId(nextId++);
         byId.put(animal.getId(), animal);
         byName.computeIfAbsent(nameKey(animal.getName()), k -> new ArrayList<>()).add(animal);
@@ -58,7 +57,7 @@ public class HashMapAnimalRepository implements AnimalRepository {
         if (name == null) {
             return List.of();
         }
-        // O(1) average lookup plus k matches; the immutable copy protects the index.
+        // O(1) average lookup plus k matches
         return List.copyOf(byName.getOrDefault(nameKey(name), List.of()));
     }
 
