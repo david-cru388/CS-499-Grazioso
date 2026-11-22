@@ -11,12 +11,15 @@
  * Design notes:
  *   Receives its repository as a constructor dependency so storage
  *   implementations can be replaced without changing service behavior.
+ *   availableAnimals() filters in O(n) and sorts the k available animals in
+ *   O(k log k).
  * 
  */
 
 package io.github.davidcru388.grazioso.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import io.github.davidcru388.grazioso.model.RescueAnimal;
@@ -65,6 +68,13 @@ public class RescueAnimalService {
                 available.add(animal);
             }
         }
+
+        // Sort only the k available animals with O(k log k) sorting.
+        // The ID tie-breaker keeps same-name animals in order.
+
+        available.sort(Comparator
+                .comparing(RescueAnimal::getName, String.CASE_INSENSITIVE_ORDER)
+                .thenComparingLong(RescueAnimal::getId));
         return available;
     }
 }

@@ -9,7 +9,7 @@
  *   Tests animal intake, lookup, and reservation behavior through the service.
  *
  * Design notes:
- *   Runs the same tests against both repositories to verify the HashMap
+ *   Runs the same tests on both repositories to verify the HashMap
  *   implementation behaves like the O(n) in-memory baseline.
  */
 
@@ -129,5 +129,16 @@ class RescueAnimalServiceTest {
         RescueAnimal available = service.intake(dog("Available", TrainingStatus.IN_SERVICE));
 
         assertEquals(List.of(available), service.availableAnimals());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("repositories")
+    void availableAnimalsAreSortedByNameThenId(Supplier<AnimalRepository> newRepository) {
+        RescueAnimalService service = createService(newRepository);
+        RescueAnimal firstSpot = service.intake(dog("spot", TrainingStatus.IN_SERVICE));
+        RescueAnimal bella = service.intake(dog("Bella", TrainingStatus.IN_SERVICE));
+        RescueAnimal secondSpot = service.intake(dog("Spot", TrainingStatus.IN_SERVICE));
+
+        assertEquals(List.of(bella, firstSpot, secondSpot), service.availableAnimals());
     }
 }
