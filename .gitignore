@@ -3,3 +3,5 @@ target/
 .DS_Store
 .vscode/
 .idea/
+# Real data never goes to a public repo.
+*.db
