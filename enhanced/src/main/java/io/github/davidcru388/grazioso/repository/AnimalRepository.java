@@ -25,6 +25,9 @@ import io.github.davidcru388.grazioso.model.RescueAnimal;
 public interface AnimalRepository {
     RescueAnimal save(RescueAnimal animal);
 
+    // The repository owns saved state; callers must not update a detached copy.
+    boolean markReserved(long id);
+
     Optional<RescueAnimal> findById(long id);
 
     List<RescueAnimal> findByName(String name);

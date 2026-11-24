@@ -57,7 +57,9 @@ public class RescueAnimalService {
             throw new ValidationException("This animal is already reserved.");
         }
 
-        animal.setReserved(true);
+        if (!repository.markReserved(id)) {
+            throw new ValidationException("No animal found with ID " + id + ".");
+        }
         return animal;
     }
 

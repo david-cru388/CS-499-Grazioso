@@ -47,6 +47,16 @@ public class HashMapAnimalRepository implements AnimalRepository {
     }
 
     @Override
+    public boolean markReserved(long id) {
+        RescueAnimal animal = byId.get(id);
+        if (animal == null) {
+            return false;
+        }
+        animal.setReserved(true);
+        return true;
+    }
+
+    @Override
     public Optional<RescueAnimal> findById(long id) {
         // O(1) average lookup, compared with the O(n) scan in InMemoryAnimalRepository.
         return Optional.ofNullable(byId.get(id));

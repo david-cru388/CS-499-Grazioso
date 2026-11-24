@@ -34,6 +34,17 @@ public class InMemoryAnimalRepository implements AnimalRepository {
     }
 
     @Override
+    public boolean markReserved(long id) {
+        for (RescueAnimal animal : animals) {
+            if (animal.getId() == id) {
+                animal.setReserved(true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public Optional<RescueAnimal> findById(long id) {
         // Keep the linear scan as the O(n) baseline for the HashMap comparison.
         for (RescueAnimal animal : animals) {
