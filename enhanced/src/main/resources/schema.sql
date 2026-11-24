@@ -2,6 +2,7 @@
 -- Date: 2026-11-23
 -- Version: 1
 -- Purpose: Defines the SQLite schema for rescue animals and enum lookups.
+-- Design notes: Separate subtype tables store dog/monkey-specific fields; lookup tables constrain enum values.
 
 CREATE TABLE IF NOT EXISTS training_status (
     id          INTEGER PRIMARY KEY,
@@ -33,7 +34,7 @@ INSERT OR IGNORE INTO monkey_species (id, species_name) VALUES
 CREATE TABLE IF NOT EXISTS animal (
     id                 INTEGER PRIMARY KEY,
     animal_type        TEXT NOT NULL CHECK (animal_type IN ('DOG', 'MONKEY')),
-    name               TEXT NOT NULL,
+    name               TEXT NOT NULL CHECK (length(name) BETWEEN 1 AND 40),
     gender             TEXT NOT NULL CHECK (gender IN ('MALE', 'FEMALE')),
     age_years          INTEGER NOT NULL CHECK (age_years BETWEEN 0 AND 30),
     weight_lb          REAL NOT NULL CHECK (

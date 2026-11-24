@@ -58,9 +58,11 @@ public class RescueAnimalService {
         }
 
         if (!repository.markReserved(id)) {
-            throw new ValidationException("No animal found with ID " + id + ".");
+            throw new ValidationException("Animal with ID " + id + " could not be reserved.");
         }
-        return animal;
+        // Return the repository's saved state, not the object loaded before the update.
+        return repository.findById(id)
+                .orElseThrow(() -> new ValidationException("No animal found with ID " + id + "."));
     }
 
     public List<RescueAnimal> availableAnimals() {
