@@ -24,6 +24,7 @@ import io.github.davidcru388.grazioso.model.Dog;
 import io.github.davidcru388.grazioso.model.Gender;
 import io.github.davidcru388.grazioso.model.RescueAnimal;
 import io.github.davidcru388.grazioso.model.TrainingStatus;
+import io.github.davidcru388.grazioso.repository.RepositoryException;
 import io.github.davidcru388.grazioso.service.RescueAnimalService;
 import io.github.davidcru388.grazioso.validation.InputValidator;
 import io.github.davidcru388.grazioso.validation.ValidationException;
@@ -52,8 +53,8 @@ public class ConsoleMenu {
             int choice = prompt("Choice", s -> InputValidator.parseMenuChoice(s, 5));
             switch (choice) {
                 case 1 -> addDog();
-                case 2 -> listAnimals(service.findAll());
-                case 3 -> listAnimals(service.availableAnimals());
+                case 2 -> listAllAnimals();
+                case 3 -> listAvailableAnimals();
                 case 4 -> reserveAnimal();
                 case 5 -> {
                     return;
@@ -96,6 +97,9 @@ public class ConsoleMenu {
             out.println("Dog added with ID " + dog.getId() + ".");
         } catch (ValidationException e) {
             out.println(e.getMessage());
+        } catch (RepositoryException e) {
+            // Show a plain storage message while keeping SQL details in the exception.
+            out.println(e.getMessage());
         }
     }
 
@@ -132,12 +136,33 @@ public class ConsoleMenu {
         }
     }
 
+    private void listAllAnimals() {
+        try {
+            listAnimals(service.findAll());
+        } catch (RepositoryException e) {
+            // Show a plain storage message while keeping SQL details in the exception.
+            out.println(e.getMessage());
+        }
+    }
+
+    private void listAvailableAnimals() {
+        try {
+            listAnimals(service.availableAnimals());
+        } catch (RepositoryException e) {
+            // Show a plain storage message while keeping SQL details in the exception.
+            out.println(e.getMessage());
+        }
+    }
+
     private void reserveAnimal() {
         int id = prompt("Animal ID", InputValidator::parseId);
         try {
             service.reserve(id);
             out.println("Animal " + id + " reserved.");
         } catch (ValidationException e) {
+            out.println(e.getMessage());
+        } catch (RepositoryException e) {
+            // Show a plain storage message while keeping SQL details in the exception.
             out.println(e.getMessage());
         }
     }

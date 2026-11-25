@@ -25,15 +25,36 @@ import io.github.davidcru388.grazioso.model.Gender;
 import io.github.davidcru388.grazioso.model.Monkey;
 import io.github.davidcru388.grazioso.model.MonkeySpecies;
 import io.github.davidcru388.grazioso.model.TrainingStatus;
-import io.github.davidcru388.grazioso.repository.HashMapAnimalRepository;
+import io.github.davidcru388.grazioso.repository.RepositoryException;
+import io.github.davidcru388.grazioso.repository.SqliteAnimalRepository;
 import io.github.davidcru388.grazioso.service.RescueAnimalService;
 import io.github.davidcru388.grazioso.ui.ConsoleMenu;
 
 public class App {
         public static void main(String[] args) {
-                RescueAnimalService service = new RescueAnimalService(new HashMapAnimalRepository());
-                seedSampleData(service);
-                new ConsoleMenu(service, new Scanner(System.in), System.out).run();
+                try {
+                        RescueAnimalService service =
+                                        new RescueAnimalService(new SqliteAnimalRepository(databaseUrl()));
+                        if (service.findAll().isEmpty()) {
+                                seedSampleData(service);
+                        }
+                        new ConsoleMenu(service, new Scanner(System.in), System.out).run();
+                } catch (RepositoryException e) {
+                        System.out.println("Could not open the database.");
+                        return;
+                }
+        }
+
+        // Configuration keeps database paths out of source and real data out of the repository.
+        private static String databaseUrl() {
+                String path = System.getProperty("grazioso.db");
+                if (path == null) {
+                        path = System.getenv("GRAZIOSO_DB");
+                }
+                if (path == null) {
+                        path = "grazioso.db";
+                }
+                return "jdbc:sqlite:" + path;
         }
 
         private static void seedSampleData(RescueAnimalService service) {

@@ -20,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Supplier;
@@ -32,6 +36,7 @@ import io.github.davidcru388.grazioso.model.TrainingStatus;
 import io.github.davidcru388.grazioso.repository.AnimalRepository;
 import io.github.davidcru388.grazioso.repository.HashMapAnimalRepository;
 import io.github.davidcru388.grazioso.repository.InMemoryAnimalRepository;
+import io.github.davidcru388.grazioso.repository.SqliteAnimalRepository;
 import io.github.davidcru388.grazioso.validation.ValidationException;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,7 +47,18 @@ class RescueAnimalServiceTest {
     static Stream<Named<Supplier<AnimalRepository>>> repositories() {
         return Stream.of(
                 Named.of("InMemoryAnimalRepository", InMemoryAnimalRepository::new),
-                Named.of("HashMapAnimalRepository", HashMapAnimalRepository::new));
+                Named.of("HashMapAnimalRepository", HashMapAnimalRepository::new),
+                Named.of("SqliteAnimalRepository", RescueAnimalServiceTest::newSqliteRepository));
+    }
+
+    private static AnimalRepository newSqliteRepository() {
+        try {
+            Path file = Files.createTempFile("grazioso", ".db");
+            file.toFile().deleteOnExit();
+            return new SqliteAnimalRepository("jdbc:sqlite:" + file);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not create a temporary SQLite database.", e);
+        }
     }
 
     private RescueAnimalService createService(Supplier<AnimalRepository> newRepository) {
@@ -128,7 +144,9 @@ class RescueAnimalServiceTest {
         service.intake(reserved);
         RescueAnimal available = service.intake(dog("Available", TrainingStatus.IN_SERVICE));
 
-        assertEquals(List.of(available), service.availableAnimals());
+        assertEquals(
+                List.of(available.getId()),
+                service.availableAnimals().stream().map(RescueAnimal::getId).toList());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -139,6 +157,8 @@ class RescueAnimalServiceTest {
         RescueAnimal bella = service.intake(dog("Bella", TrainingStatus.IN_SERVICE));
         RescueAnimal secondSpot = service.intake(dog("Spot", TrainingStatus.IN_SERVICE));
 
-        assertEquals(List.of(bella, firstSpot, secondSpot), service.availableAnimals());
+        assertEquals(
+                List.of(bella.getId(), firstSpot.getId(), secondSpot.getId()),
+                service.availableAnimals().stream().map(RescueAnimal::getId).toList());
     }
 }

@@ -21,6 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +45,11 @@ class SqliteAnimalRepositoryTest {
     Path tempDir;
 
     private SqliteAnimalRepository newRepository(String databaseName) {
-        return new SqliteAnimalRepository("jdbc:sqlite:" + tempDir.resolve(databaseName));
+        return new SqliteAnimalRepository(databaseUrl(databaseName));
+    }
+
+    private String databaseUrl(String databaseName) {
+        return "jdbc:sqlite:" + tempDir.resolve(databaseName);
     }
 
     private Dog dog(String name, TrainingStatus status) {
@@ -142,5 +151,69 @@ class SqliteAnimalRepositoryTest {
 
         assertThrows(IllegalStateException.class, () -> repository.save(rex));
         assertEquals(1, repository.findAll().size());
+    }
+
+    @Test
+    void treatsSqlSyntaxInNameAsData() {
+        SqliteAnimalRepository repository = newRepository("injection.db");
+        String injectionLikeName = "Robert' OR true OR 'x";
+        RescueAnimal matchingAnimal = repository.save(dog(injectionLikeName, TrainingStatus.PHASE_I));
+        repository.save(dog("Other", TrainingStatus.PHASE_I));
+
+        List<RescueAnimal> matches = repository.findByName(injectionLikeName);
+
+        assertEquals(1, matches.size());
+        assertEquals(matchingAnimal.getId(), matches.get(0).getId());
+        assertEquals(2, repository.findAll().size());
+    }
+
+    @Test
+    void rollsBackAnimalInsertWhenMonkeyInsertFails() throws SQLException {
+        String jdbcUrl = databaseUrl("rollback.db");
+        SqliteAnimalRepository repository = new SqliteAnimalRepository(jdbcUrl);
+        repository.save(dog("Terry", TrainingStatus.PHASE_I));
+        int previousAnimalCount = repository.findAll().size();
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl);
+                Statement statement = connection.createStatement()) {
+            statement.executeUpdate(
+                    "DELETE FROM monkey_species WHERE species_name = 'MARMOSET'");
+        }
+
+        Monkey tamarin = new Monkey(
+                "Tami",
+                Gender.FEMALE,
+                2,
+                10.0,
+                LocalDate.of(2020, 3, 10),
+                "United States",
+                TrainingStatus.PHASE_I,
+                false,
+                "United States",
+                MonkeySpecies.MARMOSET,
+                10.0,
+                20.0,
+                18.0);
+
+        assertThrows(RepositoryException.class, () -> repository.save(tamarin));
+        assertEquals(previousAnimalCount, repository.findAll().size());
+    }
+
+    @Test
+    void databaseRejectsAgeOutsideCheckConstraint() throws SQLException {
+        String jdbcUrl = databaseUrl("age-check.db");
+        new SqliteAnimalRepository(jdbcUrl);
+        String sql = """
+                INSERT INTO animal (
+                    animal_type, name, gender, age_years, weight_lb, acquisition_date,
+                    acquisition_country, training_status_id, reserved, in_service_country
+                ) VALUES ('DOG', 'Rex', 'MALE', 31, 35.2, '2020-02-03',
+                          'United States', 2, 0, 'United States')
+                """;
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl);
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            assertThrows(SQLException.class, statement::executeUpdate);
+        }
     }
 }
