@@ -69,11 +69,8 @@ public class SqliteAnimalRepository implements AnimalRepository {
             statement.execute("PRAGMA foreign_keys = ON");
             return connection;
         } catch (SQLException e) {
-            try {
-                connection.close();
-            } catch (SQLException closeException) {
-                e.addSuppressed(closeException);
-            }
+            // Close the connection before rethrowing so failed setup does not leave it open.
+            connection.close();
             throw e;
         }
     }
@@ -111,6 +108,12 @@ public class SqliteAnimalRepository implements AnimalRepository {
 
     @Override
     public RescueAnimal save(RescueAnimal animal) {
+        // Check before writing because a committed row cannot be undone by ID assignment.
+        if (animal.getId() != 0) {
+            throw new IllegalStateException("Animal has already been saved.");
+        }
+
+        // A missing enum lookup yields NULL and the NOT NULL constraint rejects the insert.
         String insertAnimal = """
                 INSERT INTO animal (
                     animal_type, name, gender, age_years, weight_lb, acquisition_date,
@@ -169,16 +172,12 @@ public class SqliteAnimalRepository implements AnimalRepository {
                 }
 
                 connection.commit();
-                // A missing enum lookup yields NULL and fails the database NOT NULL
-                // constraint; only assign the ID after both rows are committed.
+                // Assign only after both rows are safely committed.
                 animal.assignId(newId);
                 return animal;
             } catch (SQLException e) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackException) {
-                    e.addSuppressed(rollbackException);
-                }
+                // Roll back so a failed subtype insert cannot leave an animal row alone.
+                connection.rollback();
                 throw e;
             }
         } catch (SQLException e) {

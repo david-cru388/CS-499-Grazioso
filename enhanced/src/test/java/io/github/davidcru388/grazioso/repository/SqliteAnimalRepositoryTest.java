@@ -17,6 +17,7 @@ package io.github.davidcru388.grazioso.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -131,5 +132,15 @@ class SqliteAnimalRepositoryTest {
         Optional<RescueAnimal> loaded = reopened.findByName("rex").stream().findFirst();
         assertTrue(loaded.isPresent());
         assertEquals(TrainingStatus.PHASE_I, loaded.orElseThrow().getTrainingStatus());
+    }
+
+    @Test
+    void rejectsSavingTheSameAnimalTwiceWithoutAddingAnotherRow() {
+        SqliteAnimalRepository repository = newRepository("duplicate.db");
+        Dog rex = dog("Rex", TrainingStatus.PHASE_I);
+        repository.save(rex);
+
+        assertThrows(IllegalStateException.class, () -> repository.save(rex));
+        assertEquals(1, repository.findAll().size());
     }
 }
